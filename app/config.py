@@ -22,13 +22,13 @@ class Settings(BaseSettings):
     version: str = Field(default="1.0.0", description="Application version")
 
     # OCR Configuration
-    # PP-OCRv5 uses lang='ch' which automatically handles multilingual text
+    # PP-OCRv5 automatically handles multilingual text
     # (Simplified Chinese, Traditional Chinese, English, Japanese, Pinyin)
-    ocr_lang: str = Field(default="ch", description="OCR language (ch enables PP-OCRv5 multilingual model)")
-    use_gpu: bool = Field(default=False, description="Enable GPU acceleration")
+    device: str = Field(default="cpu", description="Device to use for OCR (cpu, gpu, or specific device like cuda:0)")
     ocr_detection_threshold: float = Field(default=0.3, ge=0.0, le=1.0, description="Text detection threshold")
     ocr_recognition_threshold: float = Field(default=0.7, ge=0.0, le=1.0, description="Text recognition threshold")
     enable_doc_orientation: bool = Field(default=False, description="Enable document orientation detection")
+    enable_doc_unwarping: bool = Field(default=False, description="Enable document unwarping")
     enable_text_orientation: bool = Field(default=True, description="Enable text orientation classification")
 
     # File Upload Configuration

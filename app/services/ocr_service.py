@@ -51,24 +51,20 @@ class OCRService:
                 # Import PaddleOCR here to defer initialization
                 from paddleocr import PaddleOCR
 
-                # Initialize PaddleOCR with lang='ch' for PP-OCRv5 multilingual model
+                # Initialize PaddleOCR for PP-OCRv5 multilingual model
                 # This single model handles Simplified Chinese, Traditional Chinese,
                 # English, Japanese, and Pinyin automatically
                 self._ocr = PaddleOCR(
-                    use_angle_cls=settings.enable_text_orientation,
-                    lang=settings.ocr_lang,  # 'ch' enables PP-OCRv5 multilingual model
-                    use_gpu=settings.use_gpu,
-                    det_db_thresh=settings.ocr_detection_threshold,
-                    rec_batch_num=1,
-                    show_log=False,  # Disable PaddleOCR's verbose logging
-                    use_dilation=True,
-                    det_db_box_thresh=0.5,
+                    use_doc_orientation_classify=settings.enable_doc_orientation,
+                    use_doc_unwarping=settings.enable_doc_unwarping,
+                    use_textline_orientation=settings.enable_text_orientation,
+                    device=settings.device,
                 )
 
                 self._initialized = True
                 logger.info(
                     f"OCR service initialized successfully "
-                    f"(GPU: {settings.use_gpu}, Lang: {settings.ocr_lang})"
+                    f"(Device: {settings.device})"
                 )
 
             except Exception as e:
@@ -79,9 +75,9 @@ class OCRService:
         """Check if OCR service is initialized"""
         return self._initialized
 
-    def is_gpu_available(self) -> bool:
-        """Check if GPU is being used"""
-        return self._settings.use_gpu if self._settings else False
+    def get_device(self) -> str:
+        """Get the device being used"""
+        return self._settings.device if self._settings else "cpu"
 
     async def process_image(
         self,
@@ -112,8 +108,8 @@ class OCRService:
                 image_input = np.array(image_input)
 
             # Run OCR inference
-            # PP-OCRv5 with lang='ch' automatically detects language
-            result = self._ocr.ocr(image_input, cls=self._settings.enable_text_orientation)
+            # PP-OCRv5 automatically detects language
+            result = self._ocr.ocr(image_input)
 
             # Process results
             processed_results = []

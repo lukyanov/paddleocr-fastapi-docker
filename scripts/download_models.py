@@ -18,26 +18,25 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def download_models(lang: str = 'ch', use_gpu: bool = False):
+def download_models(device: str = 'cpu'):
     """
     Initialize PaddleOCR to trigger model download
 
     Args:
-        lang: Language code (default 'ch' for PP-OCRv5 multilingual model)
-        use_gpu: Whether to use GPU acceleration
+        device: Device to use (cpu, gpu, cuda:0, etc.)
     """
     try:
-        logger.info(f"Starting model download (lang={lang}, use_gpu={use_gpu})")
+        logger.info(f"Starting model download (device={device})")
 
         from paddleocr import PaddleOCR
 
-        # Initialize PaddleOCR with lang='ch' for PP-OCRv5 multilingual model
+        # Initialize PaddleOCR for PP-OCRv5 multilingual model
         # This triggers download of detection, recognition, and classification models
         ocr = PaddleOCR(
-            use_angle_cls=True,
-            lang=lang,
-            use_gpu=use_gpu,
-            show_log=True  # Show download progress
+            use_doc_orientation_classify=False,
+            use_doc_unwarping=False,
+            use_textline_orientation=False,
+            device=device
         )
 
         logger.info("Model download completed successfully")
@@ -52,18 +51,16 @@ def download_models(lang: str = 'ch', use_gpu: bool = False):
 
 if __name__ == "__main__":
     # Get configuration from environment variables
-    lang = os.getenv('OCR_LANG', 'ch')
-    use_gpu = os.getenv('USE_GPU', 'false').lower() == 'true'
+    device = os.getenv('DEVICE', 'cpu')
 
     logger.info("=" * 60)
     logger.info("PaddleOCR Model Download Script")
     logger.info("=" * 60)
-    logger.info(f"Language: {lang}")
-    logger.info(f"GPU: {use_gpu}")
+    logger.info(f"Device: {device}")
     logger.info(f"Model cache: {os.getenv('PADDLEOCR_HOME', 'default')}")
     logger.info("=" * 60)
 
-    success = download_models(lang=lang, use_gpu=use_gpu)
+    success = download_models(device=device)
 
     if success:
         logger.info("Model download script completed successfully")

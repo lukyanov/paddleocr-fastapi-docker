@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsm6 \
     libxext6 \
     libxrender1 \
-    libgl1-mesa-glx \
+    libgl1 \
+    libglu1-mesa \
     && rm -rf /var/lib/apt/lists/*
 
 # Set Python 3.13 as default
@@ -30,7 +31,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install PaddlePaddle GPU version and other dependencies
-RUN pip install --no-cache-dir paddlepaddle-gpu==3.3.0 -i https://mirror.baidu.com/pypi/simple && \
+RUN pip install --no-cache-dir paddlepaddle-gpu==3.2.2 -i https://mirror.baidu.com/pypi/simple && \
     pip install --no-cache-dir fastapi==0.128.0 \
     uvicorn[standard]==0.40.0 \
     python-multipart==0.0.21 \
@@ -42,7 +43,7 @@ RUN pip install --no-cache-dir paddlepaddle-gpu==3.3.0 -i https://mirror.baidu.c
     pydantic==2.12.5 \
     pydantic-settings==2.12.0 \
     python-dotenv==1.2.1 \
-    numpy==2.4.1
+    "numpy>=2.0.0,<2.3.0"
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser
@@ -60,7 +61,7 @@ USER appuser
 
 ENV PYTHONPATH=/app
 ENV PADDLEOCR_HOME=/home/appuser/.paddleocr
-ENV USE_GPU=true
+ENV DEVICE=gpu
 
 # Expose FastAPI port
 EXPOSE 8000

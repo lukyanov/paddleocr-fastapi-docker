@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info(f"Starting {settings.app_name} v{__version__}")
     logger.info(f"Debug mode: {settings.debug}")
-    logger.info(f"GPU enabled: {settings.use_gpu}")
+    logger.info(f"Device: {settings.device}")
 
     try:
         await ocr_service.initialize(settings)

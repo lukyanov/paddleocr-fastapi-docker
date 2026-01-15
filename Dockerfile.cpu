@@ -1,7 +1,7 @@
 # Multi-stage build for CPU-only PaddleOCR FastAPI service
 
 # Stage 1: Builder
-FROM python:3.13-slim as builder
+FROM python:3.13-slim AS builder
 
 WORKDIR /build
 
@@ -24,7 +24,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsm6 \
     libxext6 \
     libxrender1 \
-    libgl1-mesa-glx \
+    libgl1 \
+    libglu1-mesa \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for security

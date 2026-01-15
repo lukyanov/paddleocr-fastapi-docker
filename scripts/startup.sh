@@ -23,12 +23,15 @@ echo "Starting FastAPI application..."
 echo "Host: 0.0.0.0"
 echo "Port: 8000"
 echo "Workers: 1"
-echo "GPU: ${USE_GPU:-false}"
+echo "Device: ${DEVICE:-cpu}"
 echo "========================================="
 
 # Start the FastAPI application with uvicorn
+# Convert LOG_LEVEL to lowercase for uvicorn
+LOG_LEVEL_LOWER=$(echo "${LOG_LEVEL:-info}" | tr '[:upper:]' '[:lower:]')
+
 exec uvicorn app.main:app \
     --host 0.0.0.0 \
     --port 8000 \
     --workers 1 \
-    --log-level "${LOG_LEVEL:-info}"
+    --log-level "$LOG_LEVEL_LOWER"

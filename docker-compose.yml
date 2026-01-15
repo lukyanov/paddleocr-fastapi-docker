@@ -12,12 +12,13 @@ services:
     environment:
       - APP_NAME=PaddleOCR FastAPI Service
       - DEBUG=false
-      - USE_GPU=false
+      - DEVICE=cpu
       - MAX_FILE_SIZE=10485760  # 10MB
       - LOG_LEVEL=INFO
-      - OCR_LANG=ch
       - OCR_DETECTION_THRESHOLD=0.3
       - OCR_RECOGNITION_THRESHOLD=0.7
+      - ENABLE_DOC_ORIENTATION=false
+      - ENABLE_DOC_UNWARPING=false
       - ENABLE_TEXT_ORIENTATION=true
       - IMAGE_DOWNLOAD_TIMEOUT=30
     volumes:

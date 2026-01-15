@@ -44,11 +44,11 @@ async def readiness_check() -> ReadinessResponse:
         ReadinessResponse with detailed service status
     """
     is_initialized = ocr_service.is_initialized()
-    is_gpu = ocr_service.is_gpu_available()
+    device = ocr_service.get_device()
 
     return ReadinessResponse(
         status="ready" if is_initialized else "not_ready",
         ocr_initialized=is_initialized,
-        gpu_available=is_gpu,
+        gpu_available=(device.startswith("gpu") or device.startswith("cuda")),
         version=__version__
     )
