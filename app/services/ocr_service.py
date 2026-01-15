@@ -82,16 +82,12 @@ class OCRService:
     async def process_image(
         self,
         image_input: Any,
-        det_thresh: Optional[float] = None,
-        rec_thresh: Optional[float] = None
     ) -> List[Dict[str, Any]]:
         """
         Process image and extract text with OCR
 
         Args:
             image_input: Image input (numpy array, PIL Image, or file path)
-            det_thresh: Optional detection threshold override
-            rec_thresh: Optional recognition threshold override
 
         Returns:
             List of detection results with text, confidence, and bounding boxes
@@ -109,26 +105,27 @@ class OCRService:
 
             # Run OCR inference
             # PP-OCRv5 automatically detects language
-            result = self._ocr.ocr(image_input)
+            result = self._ocr.predict(image_input)
 
             # Process results
             processed_results = []
 
-            if result and result[0]:
-                for detection in result[0]:
-                    # PaddleOCR result format: [box, (text, confidence)]
-                    box = detection[0]
-                    text, confidence = detection[1]
+            if result:
+                for res in result:
+                    # PaddleOCR 3.x result format:
+                    # res['rec_texts'] - list of recognized text strings
+                    # res['rec_scores'] - list of confidence scores
+                    # res['dt_polys'] - list of detection polygons
+                    texts = res.get('rec_texts', [])
+                    scores = res.get('rec_scores', [])
+                    boxes = res.get('dt_polys', [])
 
-                    # Apply confidence thresholds if provided
-                    if rec_thresh and confidence < rec_thresh:
-                        continue
-
-                    processed_results.append({
-                        "text": text,
-                        "confidence": float(confidence),
-                        "box": [[float(x), float(y)] for x, y in box]
-                    })
+                    for text, confidence, box in zip(texts, scores, boxes):
+                        processed_results.append({
+                            "text": text,
+                            "confidence": float(confidence),
+                            "box": [[float(x), float(y)] for x, y in box]
+                        })
 
             logger.info(f"OCR processing completed: {len(processed_results)} detections")
             return processed_results

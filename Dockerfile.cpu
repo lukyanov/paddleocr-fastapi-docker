@@ -1,7 +1,9 @@
 # Multi-stage build for CPU-only PaddleOCR FastAPI service
 
 # Stage 1: Builder
-FROM python:3.13-slim AS builder
+# Note: Python 3.11 is required for PaddlePaddle stability
+# Python 3.13 causes segmentation faults due to lack of support
+FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
@@ -15,7 +17,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Stage 2: Runtime
-FROM python:3.13-slim
+FROM python:3.11-slim
 
 # Install runtime system dependencies for PaddlePaddle and OpenCV
 RUN apt-get update && apt-get install -y --no-install-recommends \

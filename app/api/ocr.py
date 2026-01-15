@@ -3,8 +3,9 @@
 import time
 import uuid
 import logging
-from typing import Optional
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status
+from typing import Optional, Union
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, Query
+from fastapi.responses import PlainTextResponse
 
 from app.config import settings
 from app.models.request import OCRUrlRequest
@@ -34,9 +35,8 @@ router = APIRouter(prefix="/api/v1/ocr", tags=["OCR"])
 )
 async def ocr_upload(
     file: UploadFile = File(..., description="Image file to process"),
-    det_thresh: Optional[float] = Form(default=0.3, description="Detection threshold (0.0-1.0)"),
-    rec_thresh: Optional[float] = Form(default=0.7, description="Recognition threshold (0.0-1.0)")
-) -> OCRResponse:
+    output: Optional[str] = Form(default="json", description="Output format: 'json' (default) or 'text' (plain text only)")
+) -> Union[OCRResponse, PlainTextResponse]:
     """
     Process uploaded image file with OCR
 
@@ -45,8 +45,7 @@ async def ocr_upload(
 
     Args:
         file: Uploaded image file
-        det_thresh: Text detection threshold
-        rec_thresh: Text recognition threshold
+        output: Output format ('json' or 'text')
 
     Returns:
         OCRResponse with detected text and bounding boxes
@@ -74,20 +73,22 @@ async def ocr_upload(
         image = image_service.preprocess_image(image)
 
         # Process with OCR
-        detections = await ocr_service.process_image(
-            image,
-            det_thresh=det_thresh,
-            rec_thresh=rec_thresh
-        )
+        detections = await ocr_service.process_image(image)
 
         # Calculate processing time
         processing_time_ms = (time.time() - start_time) * 1000
 
         # Build response
         text_boxes = [TextBox(**detection) for detection in detections]
+        full_text = "\n".join(tb.text for tb in text_boxes)
+
+        # Return plain text if requested
+        if output == "text":
+            return PlainTextResponse(content=full_text)
 
         result = OCRResult(
-            results=text_boxes,
+            text=full_text,
+            text_boxes=text_boxes,
             processing_time_ms=processing_time_ms,
             num_detections=len(text_boxes)
         )
@@ -160,7 +161,10 @@ async def ocr_upload(
     summary="OCR from image URL",
     description="Download and process image from URL with OCR (PP-OCRv5 multilingual)"
 )
-async def ocr_url(request: OCRUrlRequest) -> OCRResponse:
+async def ocr_url(
+    request: OCRUrlRequest,
+    output: Optional[str] = Query(default="json", description="Output format: 'json' (default) or 'text' (plain text only)")
+) -> Union[OCRResponse, PlainTextResponse]:
     """
     Download image from URL and process with OCR
 
@@ -168,7 +172,8 @@ async def ocr_url(request: OCRUrlRequest) -> OCRResponse:
     English, Japanese, Pinyin) without explicit specification.
 
     Args:
-        request: OCR URL request with image URL and parameters
+        request: OCR URL request with image URL
+        output: Output format ('json' or 'text')
 
     Returns:
         OCRResponse with detected text and bounding boxes
@@ -194,20 +199,22 @@ async def ocr_url(request: OCRUrlRequest) -> OCRResponse:
         image = image_service.preprocess_image(image)
 
         # Process with OCR
-        detections = await ocr_service.process_image(
-            image,
-            det_thresh=request.det_thresh,
-            rec_thresh=request.rec_thresh
-        )
+        detections = await ocr_service.process_image(image)
 
         # Calculate processing time
         processing_time_ms = (time.time() - start_time) * 1000
 
         # Build response
         text_boxes = [TextBox(**detection) for detection in detections]
+        full_text = "\n".join(tb.text for tb in text_boxes)
+
+        # Return plain text if requested
+        if output == "text":
+            return PlainTextResponse(content=full_text)
 
         result = OCRResult(
-            results=text_boxes,
+            text=full_text,
+            text_boxes=text_boxes,
             processing_time_ms=processing_time_ms,
             num_detections=len(text_boxes)
         )

@@ -15,7 +15,8 @@ class TextBox(BaseModel):
 class OCRResult(BaseModel):
     """Complete OCR processing result"""
 
-    results: List[TextBox] = Field(default_factory=list, description="List of detected text boxes")
+    text: str = Field(..., description="All detected text concatenated with newlines")
+    text_boxes: List[TextBox] = Field(default_factory=list, description="List of detected text boxes")
     processing_time_ms: float = Field(..., description="Processing time in milliseconds")
     num_detections: int = Field(..., description="Number of text detections")
 

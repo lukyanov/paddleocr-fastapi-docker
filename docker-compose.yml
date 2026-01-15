@@ -2,6 +2,9 @@ version: '3.8'
 
 services:
   paddleocr-api:
+    # Force amd64 platform for consistent builds across all hosts
+    # PaddlePaddle lacks native arm64 wheels, so we use emulation on Apple Silicon
+    platform: linux/amd64
     build:
       context: .
       dockerfile: Dockerfile.cpu

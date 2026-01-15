@@ -25,8 +25,6 @@ class Settings(BaseSettings):
     # PP-OCRv5 automatically handles multilingual text
     # (Simplified Chinese, Traditional Chinese, English, Japanese, Pinyin)
     device: str = Field(default="cpu", description="Device to use for OCR (cpu, gpu, or specific device like cuda:0)")
-    ocr_detection_threshold: float = Field(default=0.3, ge=0.0, le=1.0, description="Text detection threshold")
-    ocr_recognition_threshold: float = Field(default=0.7, ge=0.0, le=1.0, description="Text recognition threshold")
     enable_doc_orientation: bool = Field(default=False, description="Enable document orientation detection")
     enable_doc_unwarping: bool = Field(default=False, description="Enable document unwarping")
     enable_text_orientation: bool = Field(default=True, description="Enable text orientation classification")

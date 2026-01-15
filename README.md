@@ -92,9 +92,7 @@ curl http://localhost:8000/health/ready
 
 ```bash
 curl -X POST "http://localhost:8000/api/v1/ocr/upload" \
-  -F "file=@/path/to/image.jpg" \
-  -F "det_thresh=0.3" \
-  -F "rec_thresh=0.7"
+  -F "file=@/path/to/image.jpg"
 ```
 
 **POST /api/v1/ocr/url** - Process image from URL
@@ -102,11 +100,7 @@ curl -X POST "http://localhost:8000/api/v1/ocr/upload" \
 ```bash
 curl -X POST "http://localhost:8000/api/v1/ocr/url" \
   -H "Content-Type: application/json" \
-  -d '{
-    "image_url": "https://example.com/image.jpg",
-    "det_thresh": 0.3,
-    "rec_thresh": 0.7
-  }'
+  -d '{"image_url": "https://example.com/image.jpg"}'
 ```
 
 ### Request Parameters
@@ -115,8 +109,7 @@ curl -X POST "http://localhost:8000/api/v1/ocr/url" \
 |-----------|------|---------|-------------|
 | `file` | File | - | Image file (upload endpoint only) |
 | `image_url` | URL | - | Image URL (url endpoint only) |
-| `det_thresh` | float | 0.3 | Text detection threshold (0.0-1.0) |
-| `rec_thresh` | float | 0.7 | Text recognition threshold (0.0-1.0) |
+| `output` | string | json | Output format: "json" or "text" (plain text only) |
 
 ### Response Format
 
@@ -125,7 +118,8 @@ curl -X POST "http://localhost:8000/api/v1/ocr/url" \
   "success": true,
   "message": "OCR processing completed successfully",
   "data": {
-    "results": [
+    "text": "all detected text joined by newlines",
+    "text_boxes": [
       {
         "text": "detected text",
         "confidence": 0.95,
@@ -167,13 +161,16 @@ cp .env.example .env
 |----------|---------|-------------|
 | `APP_NAME` | PaddleOCR FastAPI Service | Application name |
 | `DEBUG` | false | Enable debug mode |
-| `USE_GPU` | false | Enable GPU acceleration |
-| `OCR_LANG` | ch | Language (ch = PP-OCRv5 multilingual) |
-| `OCR_DETECTION_THRESHOLD` | 0.3 | Detection threshold |
-| `OCR_RECOGNITION_THRESHOLD` | 0.7 | Recognition threshold |
+| `DEVICE` | cpu | Device for OCR (cpu, gpu, or cuda:0) |
+| `ENABLE_DOC_ORIENTATION` | false | Enable document orientation detection |
+| `ENABLE_DOC_UNWARPING` | false | Enable document unwarping |
+| `ENABLE_TEXT_ORIENTATION` | true | Enable text orientation classification |
 | `MAX_FILE_SIZE` | 10485760 | Max file size (10MB) |
 | `IMAGE_DOWNLOAD_TIMEOUT` | 30 | URL download timeout (seconds) |
 | `LOG_LEVEL` | INFO | Logging level |
+| `HOST` | 0.0.0.0 | Server host |
+| `PORT` | 8000 | Server port |
+| `WORKERS` | 1 | Number of worker processes |
 
 ## Development
 
