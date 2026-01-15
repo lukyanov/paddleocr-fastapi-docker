@@ -100,7 +100,7 @@ curl -X POST "http://localhost:8000/api/v1/ocr/upload" \
 ```bash
 curl -X POST "http://localhost:8000/api/v1/ocr/url" \
   -H "Content-Type: application/json" \
-  -d '{"image_url": "https://example.com/image.jpg"}'
+  -d '{"file_url": "https://example.com/image.jpg"}'
 ```
 
 ### Request Parameters
@@ -108,7 +108,7 @@ curl -X POST "http://localhost:8000/api/v1/ocr/url" \
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `file` | File | - | Image file (upload endpoint only) |
-| `image_url` | URL | - | Image URL (url endpoint only) |
+| `file_url` | URL | - | File URL (url endpoint only) |
 | `output` | string | json | Output format: "json" or "text" (plain text only) |
 
 ### Response Format

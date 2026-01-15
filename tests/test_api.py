@@ -63,7 +63,7 @@ class TestOCREndpoints:
         response = client.post(
             "/api/v1/ocr/url",
             json={
-                "image_url": "not-a-valid-url",
+                "file_url": "not-a-valid-url",
                 "det_thresh": 0.3,
                 "rec_thresh": 0.7
             }

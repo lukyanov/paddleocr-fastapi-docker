@@ -6,9 +6,9 @@ from pydantic import BaseModel, Field, HttpUrl, field_validator
 class OCRUrlRequest(BaseModel):
     """Request model for URL-based OCR"""
 
-    image_url: HttpUrl = Field(..., description="URL of image to process")
+    file_url: HttpUrl = Field(..., description="URL of file to process (image or PDF)")
 
-    @field_validator('image_url')
+    @field_validator('file_url')
     @classmethod
     def validate_url_scheme(cls, v):
         """Validate that URL uses HTTP or HTTPS scheme"""

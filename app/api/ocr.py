@@ -185,11 +185,11 @@ async def ocr_url(
     start_time = time.time()
 
     try:
-        logger.info(f"[{request_id}] Processing URL: {request.image_url}")
+        logger.info(f"[{request_id}] Processing URL: {request.file_url}")
 
         # Download image from URL
         image_content, content_type = await image_service.download_from_url(
-            str(request.image_url),
+            str(request.file_url),
             timeout=settings.image_download_timeout,
             max_size=settings.max_file_size
         )
