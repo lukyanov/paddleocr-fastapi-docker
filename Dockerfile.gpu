@@ -1,0 +1,73 @@
+# GPU-enabled PaddleOCR FastAPI service using CUDA
+
+# Use Python 3.13 with CUDA support as base
+# Note: Adjust CUDA version based on your GPU drivers
+FROM nvidia/cuda:12.6.0-cudnn-runtime-ubuntu22.04
+
+# Install Python 3.13 and dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.13 \
+    python3.13-dev \
+    python3-pip \
+    libgomp1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Python 3.13 as default
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1 && \
+    update-alternatives --install /usr/bin/python python /usr/bin/python3.13 1
+
+# Upgrade pip
+RUN python3 -m pip install --upgrade pip
+
+WORKDIR /app
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+
+# Install PaddlePaddle GPU version and other dependencies
+RUN pip install --no-cache-dir paddlepaddle-gpu==3.3.0 -i https://mirror.baidu.com/pypi/simple && \
+    pip install --no-cache-dir fastapi==0.128.0 \
+    uvicorn[standard]==0.40.0 \
+    python-multipart==0.0.21 \
+    paddleocr==3.3.2 \
+    pillow==12.1.0 \
+    opencv-python-headless==4.12.0.88 \
+    aiohttp==3.13.3 \
+    httpx==0.28.1 \
+    pydantic==2.12.5 \
+    pydantic-settings==2.12.0 \
+    python-dotenv==1.2.1 \
+    numpy==2.4.1
+
+# Create non-root user
+RUN useradd -m -u 1000 appuser
+
+# Copy application code
+COPY --chown=appuser:appuser ./app ./app
+COPY --chown=appuser:appuser ./scripts ./scripts
+
+# Create directory for PaddleOCR model cache
+RUN mkdir -p /home/appuser/.paddleocr && \
+    chown -R appuser:appuser /home/appuser/.paddleocr
+
+# Switch to non-root user
+USER appuser
+
+ENV PYTHONPATH=/app
+ENV PADDLEOCR_HOME=/home/appuser/.paddleocr
+ENV USE_GPU=true
+
+# Expose FastAPI port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health', timeout=5)"
+
+# Run startup script
+CMD ["/bin/bash", "/app/scripts/startup.sh"]

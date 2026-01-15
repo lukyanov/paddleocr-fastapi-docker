@@ -1,0 +1,62 @@
+# Multi-stage build for CPU-only PaddleOCR FastAPI service
+
+# Stage 1: Builder
+FROM python:3.13-slim as builder
+
+WORKDIR /build
+
+# Install system dependencies required for building Python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Stage 2: Runtime
+FROM python:3.13-slim
+
+# Install runtime system dependencies for PaddlePaddle and OpenCV
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for security
+RUN useradd -m -u 1000 appuser
+
+WORKDIR /app
+
+# Copy Python packages from builder stage
+COPY --from=builder /root/.local /home/appuser/.local
+
+# Copy application code
+COPY --chown=appuser:appuser ./app ./app
+COPY --chown=appuser:appuser ./scripts ./scripts
+
+# Create directory for PaddleOCR model cache
+RUN mkdir -p /home/appuser/.paddleocr && \
+    chown -R appuser:appuser /home/appuser/.paddleocr
+
+# Switch to non-root user
+USER appuser
+
+# Update PATH to include user-local Python packages
+ENV PATH=/home/appuser/.local/bin:$PATH
+ENV PYTHONPATH=/app
+ENV PADDLEOCR_HOME=/home/appuser/.paddleocr
+
+# Expose FastAPI port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health', timeout=5)"
+
+# Run startup script
+CMD ["/bin/bash", "/app/scripts/startup.sh"]

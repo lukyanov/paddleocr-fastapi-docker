@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  paddleocr-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+    image: paddleocr-fastapi:cpu
+    container_name: paddleocr-api-cpu
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=PaddleOCR FastAPI Service
+      - DEBUG=false
+      - USE_GPU=false
+      - MAX_FILE_SIZE=10485760  # 10MB
+      - LOG_LEVEL=INFO
+      - OCR_LANG=ch
+      - OCR_DETECTION_THRESHOLD=0.3
+      - OCR_RECOGNITION_THRESHOLD=0.7
+      - ENABLE_TEXT_ORIENTATION=true
+      - IMAGE_DOWNLOAD_TIMEOUT=30
+    volumes:
+      # Persist model cache to avoid re-downloading on container restart
+      - paddleocr-models:/home/appuser/.paddleocr
+      # Optional: mount for logs
+      # - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          memory: 2G
+
+volumes:
+  paddleocr-models:
+    driver: local
