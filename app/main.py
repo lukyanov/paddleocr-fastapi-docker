@@ -1,6 +1,8 @@
 """FastAPI application entry point"""
 
 import logging
+import os
+import signal
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,6 +11,21 @@ from app import __version__
 from app.config import settings
 from app.api import health, ocr
 from app.services.ocr_service import ocr_service
+
+
+def _force_exit_handler(signum, frame):
+    """
+    Force immediate exit on SIGTERM/SIGINT.
+
+    PaddlePaddle's C++ backend installs its own signal handler that crashes
+    with a fatal error on SIGTERM. Using os._exit() terminates immediately
+    without running any cleanup handlers, preventing the C++ crash message.
+    """
+    sig_name = signal.Signals(signum).name
+    print(f"\nReceived {sig_name}, exiting...", flush=True)
+    # os._exit() terminates immediately without cleanup
+    # This prevents PaddlePaddle's C++ signal handler from firing
+    os._exit(0)
 
 # Configure logging
 logging.basicConfig(
@@ -33,6 +50,10 @@ async def lifespan(app: FastAPI):
 
     try:
         await ocr_service.initialize(settings)
+        # Install signal handlers AFTER PaddlePaddle is initialized
+        # This overrides PaddlePaddle's C++ signal handlers
+        signal.signal(signal.SIGTERM, _force_exit_handler)
+        signal.signal(signal.SIGINT, _force_exit_handler)
         logger.info("Application startup completed")
     except Exception as e:
         logger.error(f"Failed to initialize application: {str(e)}")

@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+# Suppress PaddlePaddle's signal crash message
+# PaddlePaddle has its own signal handler that crashes on SIGTERM
+# Setting this env var tells glog (Google's logging library) to be less verbose
+export GLOG_minloglevel=3
+# Suppress C++ call stack prints
+export FLAGS_call_stack_level=0
+
 echo "========================================="
 echo "PaddleOCR FastAPI Service - Startup"
 echo "========================================="

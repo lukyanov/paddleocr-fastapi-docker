@@ -7,6 +7,10 @@ services:
       dockerfile: Dockerfile.gpu
     image: paddleocr-fastapi:gpu
     container_name: paddleocr-api-gpu
+    # Use tini as PID 1 for proper signal handling
+    init: true
+    # Give graceful shutdown more time
+    stop_grace_period: 10s
     ports:
       - "8000:8000"
     environment:
