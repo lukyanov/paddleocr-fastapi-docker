@@ -6,7 +6,7 @@ from typing import Optional, Dict, Any, List
 import numpy as np
 from PIL import Image
 
-from app.config import Settings
+from app.config import Settings, get_model_variant_config
 from app.utils.exceptions import OCRInitializationError, OCRProcessingError
 
 logger = logging.getLogger(__name__)
@@ -51,20 +51,31 @@ class OCRService:
                 # Import PaddleOCR here to defer initialization
                 from paddleocr import PaddleOCR
 
+                # Get model configuration for the specified variant
+                model_config = get_model_variant_config(settings.model_variant)
+
                 # Initialize PaddleOCR for PP-OCRv5 multilingual model
                 # This single model handles Simplified Chinese, Traditional Chinese,
                 # English, Japanese, and Pinyin automatically
-                self._ocr = PaddleOCR(
-                    use_doc_orientation_classify=settings.enable_doc_orientation,
-                    use_doc_unwarping=settings.enable_doc_unwarping,
-                    use_textline_orientation=settings.enable_text_orientation,
-                    device=settings.device,
-                )
+                ocr_kwargs = {
+                    "use_doc_orientation_classify": settings.enable_doc_orientation,
+                    "use_doc_unwarping": settings.enable_doc_unwarping,
+                    "use_textline_orientation": settings.enable_text_orientation,
+                    "device": settings.device,
+                }
+
+                # Apply model names from variant config (None means use PaddleOCR defaults)
+                if model_config.detection_model:
+                    ocr_kwargs["text_detection_model_name"] = model_config.detection_model
+                if model_config.recognition_model:
+                    ocr_kwargs["text_recognition_model_name"] = model_config.recognition_model
+
+                self._ocr = PaddleOCR(**ocr_kwargs)
 
                 self._initialized = True
                 logger.info(
                     f"OCR service initialized successfully "
-                    f"(Device: {settings.device})"
+                    f"(Device: {settings.device}, Variant: {settings.model_variant})"
                 )
 
             except Exception as e:

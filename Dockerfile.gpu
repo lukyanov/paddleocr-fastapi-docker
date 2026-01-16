@@ -4,6 +4,10 @@
 # Note: Adjust CUDA version based on your GPU drivers
 FROM nvidia/cuda:12.6.0-cudnn-runtime-ubuntu22.04
 
+# Build argument for model variant (server or mobile)
+# Usage: docker build --build-arg MODEL_VARIANT=mobile -f Dockerfile.gpu .
+ARG MODEL_VARIANT=server
+
 # Install Python 3.13 and dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.13 \
@@ -52,23 +56,31 @@ RUN useradd -m -u 1000 appuser
 COPY --chown=appuser:appuser ./app ./app
 COPY --chown=appuser:appuser ./scripts ./scripts
 
-# Create directory for PaddleOCR model cache
-RUN mkdir -p /home/appuser/.paddleocr && \
-    chown -R appuser:appuser /home/appuser/.paddleocr
+# Set environment variables
+ENV MODEL_VARIANT=${MODEL_VARIANT}
+ENV PYTHONPATH=/app
+ENV DEVICE=gpu
+
+# Download models at build time (downloads to /root/.paddlex as root)
+# Then move to appuser directory and set ownership
+RUN python3 /app/scripts/download_models.py && \
+    mkdir -p /home/appuser/.paddlex && \
+    cp -r /root/.paddlex/* /home/appuser/.paddlex/ && \
+    chown -R appuser:appuser /home/appuser/.paddlex
+
+# Set PaddleX environment variables for runtime (PaddleOCR 3.x)
+ENV PADDLEX_HOME=/home/appuser/.paddlex
+ENV HUB_HOME=/home/appuser/.paddlex/official_models
 
 # Switch to non-root user
 USER appuser
 
-ENV PYTHONPATH=/app
-ENV PADDLEOCR_HOME=/home/appuser/.paddleocr
-ENV DEVICE=gpu
-
 # Expose FastAPI port
-EXPOSE 8000
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health', timeout=5)"
+    CMD python -c "import requests; requests.get('http://localhost:8080/health', timeout=5)"
 
 # Run startup script
 CMD ["/bin/bash", "/app/scripts/startup.sh"]

@@ -1,9 +1,38 @@
 """Application configuration using Pydantic Settings"""
 
 import os
-from typing import List
+from typing import List, Dict, Optional
+from dataclasses import dataclass
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+@dataclass(frozen=True)
+class ModelVariantConfig:
+    """Configuration for a PaddleOCR model variant"""
+    detection_model: Optional[str] = None  # None means use PaddleOCR default
+    recognition_model: Optional[str] = None
+
+
+# Model variant configurations
+# Add new variants here - they'll be available in both build and runtime
+MODEL_VARIANTS: Dict[str, ModelVariantConfig] = {
+    "server": ModelVariantConfig(
+        # Server models (default) - higher accuracy, larger size
+        detection_model=None,  # Uses PaddleOCR default (PP-OCRv5_server_det)
+        recognition_model=None,  # Uses PaddleOCR default (PP-OCRv5_server_rec)
+    ),
+    "mobile": ModelVariantConfig(
+        # Mobile models - smaller and faster, slightly lower accuracy
+        detection_model="PP-OCRv5_mobile_det",
+        recognition_model="PP-OCRv5_mobile_rec",
+    ),
+}
+
+
+def get_model_variant_config(variant: str) -> ModelVariantConfig:
+    """Get model configuration for a variant, with fallback to server"""
+    return MODEL_VARIANTS.get(variant, MODEL_VARIANTS["server"])
 
 
 class Settings(BaseSettings):
@@ -25,6 +54,7 @@ class Settings(BaseSettings):
     # PP-OCRv5 automatically handles multilingual text
     # (Simplified Chinese, Traditional Chinese, English, Japanese, Pinyin)
     device: str = Field(default="cpu", description="Device to use for OCR (cpu, gpu, or specific device like cuda:0)")
+    model_variant: str = Field(default="server", description="Model variant: 'server' for higher accuracy, 'mobile' for smaller/faster")
     enable_doc_orientation: bool = Field(default=False, description="Enable document orientation detection")
     enable_doc_unwarping: bool = Field(default=False, description="Enable document unwarping")
     enable_text_orientation: bool = Field(default=True, description="Enable text orientation classification")
@@ -48,7 +78,7 @@ class Settings(BaseSettings):
 
     # Server
     host: str = Field(default="0.0.0.0", description="Server host")
-    port: int = Field(default=8000, description="Server port")
+    port: int = Field(default=8080, description="Server port")
     workers: int = Field(default=1, description="Number of worker processes")
 
 

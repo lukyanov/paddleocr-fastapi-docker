@@ -62,6 +62,18 @@ docker-compose -f docker-compose.gpu.yml up -d
 curl http://localhost:8000/health/ready
 ```
 
+### Model Variants
+
+Choose between server (higher accuracy) or mobile (smaller/faster) models:
+
+```bash
+# Server models (default) - higher accuracy, ~2-3GB image
+docker build -f Dockerfile.cpu -t paddleocr:server .
+
+# Mobile models - smaller and faster, ~1.5GB image
+docker build -f Dockerfile.cpu --build-arg MODEL_VARIANT=mobile -t paddleocr:mobile .
+```
+
 The service will be available at `http://localhost:8000`
 
 ## API Documentation
@@ -162,6 +174,7 @@ cp .env.example .env
 | `APP_NAME` | PaddleOCR FastAPI Service | Application name |
 | `DEBUG` | false | Enable debug mode |
 | `DEVICE` | cpu | Device for OCR (cpu, gpu, or cuda:0) |
+| `MODEL_VARIANT` | server | Model variant: "server" (accurate) or "mobile" (fast) |
 | `ENABLE_DOC_ORIENTATION` | false | Enable document orientation detection |
 | `ENABLE_DOC_UNWARPING` | false | Enable document unwarping |
 | `ENABLE_TEXT_ORIENTATION` | true | Enable text orientation classification |
@@ -169,8 +182,14 @@ cp .env.example .env
 | `IMAGE_DOWNLOAD_TIMEOUT` | 30 | URL download timeout (seconds) |
 | `LOG_LEVEL` | INFO | Logging level |
 | `HOST` | 0.0.0.0 | Server host |
-| `PORT` | 8000 | Server port |
+| `PORT` | 8080 | Server port |
 | `WORKERS` | 1 | Number of worker processes |
+
+### Build Arguments
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `MODEL_VARIANT` | server | Bake server or mobile models into image |
 
 ## Development
 
@@ -265,11 +284,11 @@ paddle-ocr-docker/
 - **CPU**: ~2-5 seconds per image
 - **GPU**: ~0.5-1 second per image (4-10x faster)
 - **Memory**: ~1.5-2GB per OCR instance
-- **First Startup**: 2-3 minutes (model download)
+- **Cold Start**: ~10-30 seconds (models baked into image)
 
 ### Optimization Tips
 
-1. **Use Persistent Volumes**: Model cache persists across restarts
+1. **Use Mobile Models**: Build with `--build-arg MODEL_VARIANT=mobile` for smaller images and faster inference
 2. **Resource Limits**: Adjust Docker resource limits based on workload
 3. **Horizontal Scaling**: Run multiple containers behind a load balancer
 4. **GPU Acceleration**: Use GPU version for high-throughput scenarios
