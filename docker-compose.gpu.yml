@@ -13,18 +13,13 @@ services:
     stop_grace_period: 10s
     ports:
       - "8080:8080"
+    # Load environment variables from .env file
+    # Values in .env override Dockerfile defaults
+    env_file:
+      - .env
     environment:
-      - APP_NAME=PaddleOCR FastAPI Service (GPU)
-      - DEBUG=false
+      # GPU-specific settings (override .env if needed)
       - DEVICE=gpu
-      - MAX_FILE_SIZE=10485760  # 10MB
-      - LOG_LEVEL=INFO
-      - OCR_DETECTION_THRESHOLD=0.3
-      - OCR_RECOGNITION_THRESHOLD=0.7
-      - ENABLE_DOC_ORIENTATION=false
-      - ENABLE_DOC_UNWARPING=false
-      - ENABLE_TEXT_ORIENTATION=true
-      - IMAGE_DOWNLOAD_TIMEOUT=30
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
     restart: unless-stopped

@@ -56,10 +56,14 @@ RUN useradd -m -u 1000 appuser
 COPY --chown=appuser:appuser ./app ./app
 COPY --chown=appuser:appuser ./scripts ./scripts
 
-# Set environment variables
+# OCR Configuration (explicit defaults)
+# These are used both at build time (model download) and runtime
 ENV MODEL_VARIANT=${MODEL_VARIANT}
 ENV PYTHONPATH=/app
 ENV DEVICE=gpu
+ENV ENABLE_DOC_ORIENTATION=false
+ENV ENABLE_DOC_UNWARPING=false
+ENV ENABLE_TEXT_ORIENTATION=true
 
 # Download models at build time (downloads to /root/.paddlex as root)
 # Then move to appuser directory and set ownership

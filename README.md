@@ -335,7 +335,7 @@ docker-compose up -d --scale paddleocr-api=3
 **Kubernetes Deployment:**
 - Use Deployment with multiple replicas
 - Configure HorizontalPodAutoscaler
-- Use PersistentVolume for model cache
+- Models are baked into the image, no PersistentVolume needed
 
 ## Troubleshooting
 
@@ -345,7 +345,7 @@ docker-compose up -d --scale paddleocr-api=3
 docker-compose logs -f
 
 # Verify model download
-docker exec -it paddleocr-api-cpu ls -la /home/appuser/.paddleocr
+docker exec -it paddleocr-api-cpu ls -la /home/appuser/.paddlex
 ```
 
 ### High Memory Usage

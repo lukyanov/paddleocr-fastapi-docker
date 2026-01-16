@@ -54,6 +54,7 @@ htmlcov/
 
 # PaddleOCR models cache
 .paddleocr/
+.paddlex/
 *.pdparams
 *.pdopt
 *.pdmodel
