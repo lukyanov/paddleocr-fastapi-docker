@@ -69,6 +69,10 @@ RUN python3 /app/scripts/download_models.py && \
 ENV PADDLEX_HOME=/home/appuser/.paddlex
 ENV HUB_HOME=/home/appuser/.paddlex/official_models
 
+# Disable MKL-DNN/OneDNN to prevent SIGFPE crashes on Cloud Run
+# OneDNN uses CPU-specific SIMD instructions that may not be available
+ENV FLAGS_use_mkldnn=0
+
 # Switch to non-root user
 USER appuser
 
