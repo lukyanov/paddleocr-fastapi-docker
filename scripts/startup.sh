@@ -10,6 +10,9 @@ export FLAGS_call_stack_level=0
 
 # PORT can be set via environment variable (defaults to 8080)
 PORT="${PORT:-8080}"
+# WORKERS controls uvicorn worker processes (defaults to 1)
+# With thread pool OCR, 1 worker is usually sufficient
+WORKERS="${WORKERS:-1}"
 
 echo "========================================="
 echo "PaddleOCR FastAPI Service - Startup"
@@ -17,7 +20,7 @@ echo "========================================="
 echo "Server:"
 echo "  Host: 0.0.0.0"
 echo "  Port: $PORT"
-echo "  Workers: 1"
+echo "  Workers: $WORKERS"
 echo "  Log Level: $LOG_LEVEL"
 echo "OCR:"
 echo "  Device: $DEVICE"
@@ -34,5 +37,5 @@ LOG_LEVEL_LOWER=$(echo "${LOG_LEVEL:-info}" | tr '[:upper:]' '[:lower:]')
 exec uvicorn app.main:app \
     --host 0.0.0.0 \
     --port "$PORT" \
-    --workers 1 \
+    --workers "$WORKERS" \
     --log-level "$LOG_LEVEL_LOWER"
