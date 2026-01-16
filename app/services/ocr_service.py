@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from concurrent.futures import ThreadPoolExecutor
 from typing import Optional, Dict, Any, List
 import numpy as np
 from PIL import Image
@@ -10,6 +11,10 @@ from app.config import Settings, get_model_variant_config
 from app.utils.exceptions import OCRInitializationError, OCRProcessingError
 
 logger = logging.getLogger(__name__)
+
+# Thread pool for running blocking OCR operations without blocking the event loop
+# This allows health check endpoints to respond while OCR is processing
+_ocr_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="ocr_worker")
 
 
 class OCRService:
@@ -117,9 +122,10 @@ class OCRService:
             if isinstance(image_input, Image.Image):
                 image_input = np.array(image_input)
 
-            # Run OCR inference
-            # PP-OCRv5 automatically detects language
-            result = self._ocr.predict(image_input)
+            # Run OCR inference in thread pool to avoid blocking the event loop
+            # This allows health check endpoints to respond during OCR processing
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(_ocr_executor, self._ocr.predict, image_input)
 
             # Process results
             processed_results = []
@@ -155,6 +161,8 @@ class OCRService:
                 logger.info("Shutting down OCR service...")
                 self._ocr = None
                 self._initialized = False
+                # Shutdown thread pool executor
+                _ocr_executor.shutdown(wait=False)
                 logger.info("OCR service shut down successfully")
 
 
