@@ -49,7 +49,7 @@ cd paddle-ocr-docker
 docker-compose up -d
 
 # Check service status
-curl http://localhost:8000/health
+curl http://localhost:8080/health
 ```
 
 ### GPU Version
@@ -59,7 +59,7 @@ curl http://localhost:8000/health
 docker-compose -f docker-compose.gpu.yml up -d
 
 # Check service status
-curl http://localhost:8000/health/ready
+curl http://localhost:8080/health/ready
 ```
 
 ### Model Variants
@@ -74,15 +74,15 @@ docker build -f Dockerfile.cpu -t paddleocr:server .
 docker build -f Dockerfile.cpu --build-arg MODEL_VARIANT=mobile -t paddleocr:mobile .
 ```
 
-The service will be available at `http://localhost:8000`
+The service will be available at `http://localhost:8080`
 
 ## API Documentation
 
 ### Interactive API Docs
 
 When running with `DEBUG=true`, access:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+- Swagger UI: http://localhost:8080/docs
+- ReDoc: http://localhost:8080/redoc
 
 ### Endpoints
 
@@ -90,12 +90,12 @@ When running with `DEBUG=true`, access:
 
 **GET /health** - Simple liveness check
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8080/health
 ```
 
 **GET /health/ready** - Readiness check with OCR status
 ```bash
-curl http://localhost:8000/health/ready
+curl http://localhost:8080/health/ready
 ```
 
 #### OCR Processing
@@ -103,14 +103,14 @@ curl http://localhost:8000/health/ready
 **POST /api/v1/ocr/upload** - Upload image file
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/ocr/upload" \
+curl -X POST "http://localhost:8080/api/v1/ocr/upload" \
   -F "file=@/path/to/image.jpg"
 ```
 
 **POST /api/v1/ocr/url** - Process image from URL
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/ocr/url" \
+curl -X POST "http://localhost:8080/api/v1/ocr/url" \
   -H "Content-Type: application/json" \
   -d '{"file_url": "https://example.com/image.jpg"}'
 ```
