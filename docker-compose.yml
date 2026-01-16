@@ -28,11 +28,6 @@ services:
       - ENABLE_DOC_UNWARPING=false
       - ENABLE_TEXT_ORIENTATION=true
       - IMAGE_DOWNLOAD_TIMEOUT=30
-    volumes:
-      # Persist model cache to avoid re-downloading on container restart
-      - paddleocr-models:/home/appuser/.paddleocr
-      # Optional: mount for logs
-      # - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
@@ -47,7 +42,3 @@ services:
           memory: 4G
         reservations:
           memory: 2G
-
-volumes:
-  paddleocr-models:
-    driver: local
