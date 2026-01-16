@@ -23,6 +23,10 @@ FROM python:3.11-slim
 # Usage: docker build --build-arg MODEL_VARIANT=mobile -f Dockerfile.cpu .
 ARG MODEL_VARIANT=server
 
+# Build argument for git commit SHA
+# Usage: docker build --build-arg GIT_SHA=$(git rev-parse HEAD) -f Dockerfile.cpu .
+ARG GIT_SHA=unknown
+
 # Install runtime system dependencies for PaddlePaddle and OpenCV
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
@@ -45,6 +49,9 @@ COPY --from=builder /root/.local /home/appuser/.local
 # Copy application code
 COPY --chown=appuser:appuser ./app ./app
 COPY --chown=appuser:appuser ./scripts ./scripts
+
+# Create version file with git SHA
+RUN echo "${GIT_SHA}" > /app/version.txt && chown appuser:appuser /app/version.txt
 
 # Update PATH and Python paths to include user-local packages (needed for download script)
 ENV PATH=/home/appuser/.local/bin:$PATH

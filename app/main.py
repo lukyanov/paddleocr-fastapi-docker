@@ -4,6 +4,7 @@ import logging
 import os
 import signal
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -11,6 +12,15 @@ from app import __version__
 from app.config import settings
 from app.api import health, ocr
 from app.services.ocr_service import ocr_service
+
+
+def get_git_sha() -> str:
+    """Read git SHA from version.txt file created during Docker build."""
+    version_file = Path(__file__).parent.parent / "version.txt"
+    try:
+        return version_file.read_text().strip()
+    except FileNotFoundError:
+        return "unknown"
 
 
 def _force_exit_handler(signum, frame):
@@ -44,7 +54,8 @@ async def lifespan(app: FastAPI):
     Initializes OCR service on startup and cleans up on shutdown
     """
     # Startup
-    logger.info(f"Starting {settings.app_name} v{__version__}")
+    git_sha = get_git_sha()
+    logger.info(f"Starting {settings.app_name} v{__version__} (commit: {git_sha})")
     logger.info(f"Debug mode: {settings.debug}")
     logger.info(f"Device: {settings.device}")
 
