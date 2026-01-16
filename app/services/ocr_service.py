@@ -62,6 +62,9 @@ class OCRService:
                     "use_doc_unwarping": settings.enable_doc_unwarping,
                     "use_textline_orientation": settings.enable_text_orientation,
                     "device": settings.device,
+                    # Disable MKL-DNN/OneDNN to prevent SIGFPE crashes on Cloud Run
+                    # OneDNN uses CPU-specific SIMD instructions that may not be available
+                    "enable_mkldnn": False,
                 }
 
                 # Apply model names from variant config (None means use PaddleOCR defaults)

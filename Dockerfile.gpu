@@ -82,6 +82,7 @@ RUN python3 /app/scripts/download_models.py && \
 # Set PaddleX environment variables for runtime (PaddleOCR 3.x)
 ENV PADDLEX_HOME=/home/appuser/.paddlex
 ENV HUB_HOME=/home/appuser/.paddlex/official_models
+ENV PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK=True
 
 # Switch to non-root user
 USER appuser
