@@ -8,7 +8,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.cpu
-    image: paddleocr-fastapi:cpu
+      args:
+        MODEL_VARIANT: ${MODEL_VARIANT:-server}
+    image: paddleocr-fastapi:cpu-${MODEL_VARIANT:-server}
     container_name: paddleocr-api-cpu
     # Use tini as PID 1 for proper signal handling
     init: true

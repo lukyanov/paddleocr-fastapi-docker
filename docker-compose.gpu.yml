@@ -5,7 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.gpu
-    image: paddleocr-fastapi:gpu
+      args:
+        MODEL_VARIANT: ${MODEL_VARIANT:-server}
+    image: paddleocr-fastapi:gpu-${MODEL_VARIANT:-server}
     container_name: paddleocr-api-gpu
     # Use tini as PID 1 for proper signal handling
     init: true

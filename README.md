@@ -38,6 +38,8 @@ PP-OCRv5 automatically detects and processes:
 - Docker and Docker Compose installed
 - For GPU version: NVIDIA Docker runtime and compatible GPU
 
+Run `make help` to see all available targets.
+
 ### CPU Version
 
 ```bash
@@ -46,7 +48,7 @@ git clone <your-repo-url>
 cd paddle-ocr-docker
 
 # Build and start the service
-docker-compose up -d
+make up
 
 # Check service status
 curl http://localhost:8080/health
@@ -56,7 +58,7 @@ curl http://localhost:8080/health
 
 ```bash
 # Build and start the GPU service
-docker-compose -f docker-compose.gpu.yml up -d
+make up-gpu
 
 # Check service status
 curl http://localhost:8080/health/ready
@@ -64,14 +66,17 @@ curl http://localhost:8080/health/ready
 
 ### Model Variants
 
-Choose between server (higher accuracy) or mobile (smaller/faster) models:
+Choose between server (higher accuracy) or mobile (smaller/faster) models using the `MODEL_VARIANT` variable:
 
 ```bash
 # Server models (default) - higher accuracy, ~2-3GB image
-docker build -f Dockerfile.cpu -t paddleocr:server .
+make build
 
 # Mobile models - smaller and faster, ~1.5GB image
-docker build -f Dockerfile.cpu --build-arg MODEL_VARIANT=mobile -t paddleocr:mobile .
+make build MODEL_VARIANT=mobile
+
+# Build and run mobile variant
+make up MODEL_VARIANT=mobile
 ```
 
 The service will be available at `http://localhost:8080`
@@ -262,6 +267,7 @@ paddle-ocr-docker/
 ├── Dockerfile.gpu               # GPU Docker image
 ├── docker-compose.yml           # CPU compose
 ├── docker-compose.gpu.yml       # GPU compose
+├── Makefile                     # Build and run targets
 ├── requirements.txt             # Python dependencies
 └── README.md
 ```
@@ -288,7 +294,7 @@ paddle-ocr-docker/
 
 ### Optimization Tips
 
-1. **Use Mobile Models**: Build with `--build-arg MODEL_VARIANT=mobile` for smaller images and faster inference
+1. **Use Mobile Models**: Build with `make build MODEL_VARIANT=mobile` for smaller images and faster inference
 2. **Resource Limits**: Adjust Docker resource limits based on workload
 3. **Horizontal Scaling**: Run multiple containers behind a load balancer
 4. **GPU Acceleration**: Use GPU version for high-throughput scenarios
@@ -342,7 +348,7 @@ docker-compose up -d --scale paddleocr-api=3
 ### Service Won't Start
 ```bash
 # Check logs
-docker-compose logs -f
+make logs
 
 # Verify model download
 docker exec -it paddleocr-api-cpu ls -la /home/appuser/.paddlex
