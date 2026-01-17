@@ -28,6 +28,7 @@ echo "  Model Variant: $MODEL_VARIANT"
 echo "  Doc Orientation: $ENABLE_DOC_ORIENTATION"
 echo "  Doc Unwarping: $ENABLE_DOC_UNWARPING"
 echo "  Text Orientation: $ENABLE_TEXT_ORIENTATION"
+echo "  MKL-DNN: $ENABLE_MKLDNN"
 echo "========================================="
 
 # Start the FastAPI application with uvicorn

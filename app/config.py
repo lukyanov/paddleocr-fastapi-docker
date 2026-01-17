@@ -58,6 +58,7 @@ class Settings(BaseSettings):
     enable_doc_orientation: bool = Field(default=False, description="Enable document orientation detection")
     enable_doc_unwarping: bool = Field(default=False, description="Enable document unwarping")
     enable_text_orientation: bool = Field(default=True, description="Enable text orientation classification")
+    enable_mkldnn: bool = Field(default=False, description="Enable MKL-DNN/OneDNN acceleration (may cause issues on some platforms)")
 
     # File Upload Configuration
     max_file_size: int = Field(default=10485760, description="Maximum file size in bytes (10MB)")

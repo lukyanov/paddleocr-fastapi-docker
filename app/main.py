@@ -58,6 +58,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.app_name} v{__version__} (commit: {git_sha})")
     logger.info(f"Debug mode: {settings.debug}")
     logger.info(f"Device: {settings.device}")
+    logger.info(f"MKL-DNN: {settings.enable_mkldnn}")
 
     try:
         await ocr_service.initialize(settings)

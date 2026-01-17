@@ -71,6 +71,7 @@ ENV DEVICE=gpu
 ENV ENABLE_DOC_ORIENTATION=false
 ENV ENABLE_DOC_UNWARPING=false
 ENV ENABLE_TEXT_ORIENTATION=true
+ENV ENABLE_MKLDNN=false
 
 # Download models at build time (downloads to /root/.paddlex as root)
 # Then move to appuser directory and set ownership

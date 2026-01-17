@@ -183,6 +183,7 @@ cp .env.example .env
 | `ENABLE_DOC_ORIENTATION` | false | Enable document orientation detection |
 | `ENABLE_DOC_UNWARPING` | false | Enable document unwarping |
 | `ENABLE_TEXT_ORIENTATION` | true | Enable text orientation classification |
+| `ENABLE_MKLDNN` | false | Enable MKL-DNN/OneDNN acceleration |
 | `MAX_FILE_SIZE` | 10485760 | Max file size (10MB) |
 | `IMAGE_DOWNLOAD_TIMEOUT` | 30 | URL download timeout (seconds) |
 | `LOG_LEVEL` | INFO | Logging level |
